@@ -1,0 +1,176 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #141414;
+  color: #fff;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-actions button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  background: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.plus-btn {
+  background: #e50914;
+  color: #fff;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.nav-actions button:hover {
+  background: #ccc;
+}
+
+.plus-btn:hover {
+  background: #ff1a24;
+}
+
+.stream-list {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.stream-list h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+#streams-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.stream-card {
+  background: #1f1f1f;
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.stream-card:hover {
+  transform: scale(1.05);
+}
+
+.stream-room {
+  display: flex;
+  padding: 80px 20px;
+}
+
+.video-container {
+  flex: 2;
+  padding-right: 20px;
+}
+
+video {
+  width: 100%;
+  background: #000;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-container {
+  flex: 1;
+  background: #1f1f1f;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+#chat-form {
+  display: flex;
+  margin-top: 10px;
+}
+
+#chat-input {
+  flex-grow: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px 0 0 5px;
+}
+
+#chat-form button {
+  padding: 10px;
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 20;
+}
+
+.modal-content {
+  background: #1f1f1f;
+  margin: 15% auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 10px;
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-content input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  width: 100%;
+  padding: 10px;
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
