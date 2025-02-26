@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import { useApiError, ErrorDisplay } from "../../utils/errorHandler";
 import { getStreams } from "../../utils/api";
 import "./VideoPlayer.css";
@@ -66,17 +65,23 @@ const VideoPlayer = ({ streamId }, ref) => {
       setRetryCount(0);
       if (token) {
         try {
-          const { data: streams } = await getStreams(); // Fetch active streams
+          console.log("Checking stream ownership...");
+          const { data: streams } = await getStreams();
           const stream = streams.find((s) => s._id === streamId);
           if (
             stream &&
             stream.owner.id === JSON.parse(atob(token.split(".")[1])).id
           ) {
+            console.log("User is stream owner, starting broadcast...");
             setIsStreaming(true);
-            startStream();
+            await startStream();
+          } else {
+            console.log("User is viewer, waiting for stream...");
           }
         } catch (err) {
-          handleError({ message: "Failed to verify stream ownership" });
+          handleError({
+            message: `Failed to verify stream ownership: ${err.message}`,
+          });
         }
       }
     };
@@ -122,22 +127,27 @@ const VideoPlayer = ({ streamId }, ref) => {
       return;
     }
     try {
+      console.log("Requesting media devices...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
+      console.log("Media stream acquired:", stream);
       stream.getTracks().forEach((track) => {
         if (pc.current.signalingState !== "closed") {
           pc.current.addTrack(track, stream);
+          console.log(`Added track: ${track.kind}`);
         }
       });
       videoRef.current.srcObject = stream;
-      console.log("Local stream added:", stream);
+      console.log("Local stream set to video element");
 
       const offer = await pc.current.createOffer();
+      console.log("Created offer:", offer);
       await pc.current.setLocalDescription(offer);
-      console.log("Sending offer:", offer);
+      console.log("Set local description with offer");
       ws.current.send(JSON.stringify({ type: "offer", offer }));
+      console.log("Sent offer to signaling server");
     } catch (err) {
       handleError({ message: `Failed to start stream: ${err.message}` });
     }
