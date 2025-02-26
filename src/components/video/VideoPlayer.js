@@ -150,22 +150,30 @@ const VideoPlayer = ({ streamId }, ref) => {
     console.log("Received signaling message:", data);
     try {
       if (data.type === "offer") {
+        console.log("Processing offer...");
         await pc.current.setRemoteDescription(
           new RTCSessionDescription(data.offer)
         );
+        console.log("Set remote description with offer");
         const answer = await pc.current.createAnswer();
+        console.log("Created answer:", answer);
         await pc.current.setLocalDescription(answer);
-        console.log("Sending answer:", answer);
+        console.log("Set local description with answer");
         ws.current.send(JSON.stringify({ type: "answer", answer }));
+        console.log("Sent answer to signaling server");
       } else if (data.type === "answer" && isStreaming) {
+        console.log("Processing answer...");
         await pc.current.setRemoteDescription(
           new RTCSessionDescription(data.answer)
         );
+        console.log("Set remote description with answer");
       } else if (data.type === "candidate") {
+        console.log("Processing ICE candidate...");
         await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-        console.log("Added ICE candidate");
+        console.log("Added ICE candidate successfully");
       }
     } catch (err) {
+      console.error("Signaling error details:", err);
       handleError({ message: `Signaling error: ${err.message}` });
     }
   };
