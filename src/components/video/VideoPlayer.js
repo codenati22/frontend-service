@@ -12,6 +12,7 @@ const VideoPlayer = ({ streamId }, ref) => {
   const ws = useRef(null);
   const pc = useRef(null);
   const isMounted = useRef(false);
+  const hasStartedStream = useRef(false); // Prevent multiple startStream calls
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const token = localStorage.getItem("token");
@@ -66,12 +67,17 @@ const VideoPlayer = ({ streamId }, ref) => {
       console.log("WebSocket connected for signaling");
       setRetryCount(0);
       if (token) {
-        if (isStreamer) {
+        if (isStreamer && !hasStartedStream.current) {
           console.log("User is streamer, starting broadcast...");
           setIsStreaming(true);
+          hasStartedStream.current = true;
           await startStream();
-        } else {
+        } else if (!isStreamer) {
           console.log("User is viewer, waiting for stream...");
+        } else {
+          console.log(
+            "Stream already started, skipping duplicate broadcast..."
+          );
         }
       } else {
         console.log("No token, treating as viewer...");
@@ -149,7 +155,7 @@ const VideoPlayer = ({ streamId }, ref) => {
     const data = JSON.parse(event.data);
     console.log("Received signaling message:", data);
     try {
-      if (data.type === "offer") {
+      if (data.type === "offer" && !isStreaming) {
         console.log("Processing offer...");
         await pc.current.setRemoteDescription(
           new RTCSessionDescription(data.offer)
@@ -163,14 +169,22 @@ const VideoPlayer = ({ streamId }, ref) => {
         console.log("Sent answer to signaling server");
       } else if (data.type === "answer" && isStreaming) {
         console.log("Processing answer...");
-        await pc.current.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
-        );
-        console.log("Set remote description with answer");
+        if (pc.current.signalingState === "have-local-offer") {
+          await pc.current.setRemoteDescription(
+            new RTCSessionDescription(data.answer)
+          );
+          console.log("Set remote description with answer");
+        } else {
+          console.log("Ignoring answer: not in correct signaling state");
+        }
       } else if (data.type === "candidate") {
         console.log("Processing ICE candidate...");
-        await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-        console.log("Added ICE candidate successfully");
+        if (pc.current.remoteDescription) {
+          await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+          console.log("Added ICE candidate successfully");
+        } else {
+          console.log("Ignoring ICE candidate: remote description not set");
+        }
       }
     } catch (err) {
       console.error("Signaling error details:", err);
