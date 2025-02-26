@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useApiError, ErrorDisplay } from "../../utils/errorHandler";
-import { getStreams } from "../../utils/api";
 import "./VideoPlayer.css";
 
 const VideoPlayer = ({ streamId }, ref) => {
@@ -15,6 +15,8 @@ const VideoPlayer = ({ streamId }, ref) => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
   const token = localStorage.getItem("token");
+  const { state } = useLocation();
+  const isStreamer = state?.isStreamer || false;
 
   const initializePeerConnection = () => {
     if (pc.current && pc.current.signalingState !== "closed") return;
@@ -64,26 +66,15 @@ const VideoPlayer = ({ streamId }, ref) => {
       console.log("WebSocket connected for signaling");
       setRetryCount(0);
       if (token) {
-        try {
-          console.log("Checking stream ownership for streamId:", streamId);
-          const { data: streams } = await getStreams();
-          console.log("Fetched streams:", streams);
-          const stream = streams.find((s) => s._id === streamId);
-          console.log("Found stream:", stream);
-          const userIdFromToken = JSON.parse(atob(token.split(".")[1])).id;
-          console.log("User ID from token:", userIdFromToken);
-          if (stream && stream.owner && stream.owner.id === userIdFromToken) {
-            console.log("User is stream owner, starting broadcast...");
-            setIsStreaming(true);
-            await startStream();
-          } else {
-            console.log("User is viewer, waiting for stream...");
-          }
-        } catch (err) {
-          handleError({
-            message: `Failed to verify stream ownership: ${err.message}`,
-          });
+        if (isStreamer) {
+          console.log("User is streamer, starting broadcast...");
+          setIsStreaming(true);
+          await startStream();
+        } else {
+          console.log("User is viewer, waiting for stream...");
         }
+      } else {
+        console.log("No token, treating as viewer...");
       }
     };
 

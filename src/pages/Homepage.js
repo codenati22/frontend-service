@@ -34,11 +34,15 @@ function Homepage() {
     try {
       console.log("Starting stream with token:", token);
       const { data } = await startStream(newStreamTitle, token);
-      navigate(`/stream/${data.streamId}`);
+      navigate(`/stream/${data.streamId}`, { state: { isStreamer: true } });
     } catch (err) {
       console.error("Start stream error:", err);
       handleError(err);
     }
+  };
+
+  const handleJoinStream = (streamId) => {
+    navigate(`/stream/${streamId}`, { state: { isStreamer: false } });
   };
 
   return (
@@ -61,9 +65,7 @@ function Homepage() {
           <div key={stream._id} className="stream-card slide-up">
             <h3>{stream.title}</h3>
             <p>By: {stream.owner.username}</p>
-            <Button onClick={() => navigate(`/stream/${stream._id}`)}>
-              Join
-            </Button>
+            <Button onClick={() => handleJoinStream(stream._id)}>Join</Button>
           </div>
         ))}
       </div>
