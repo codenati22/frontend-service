@@ -65,13 +65,14 @@ const VideoPlayer = ({ streamId }, ref) => {
       setRetryCount(0);
       if (token) {
         try {
-          console.log("Checking stream ownership...");
+          console.log("Checking stream ownership for streamId:", streamId);
           const { data: streams } = await getStreams();
+          console.log("Fetched streams:", streams);
           const stream = streams.find((s) => s._id === streamId);
-          if (
-            stream &&
-            stream.owner.id === JSON.parse(atob(token.split(".")[1])).id
-          ) {
+          console.log("Found stream:", stream);
+          const userIdFromToken = JSON.parse(atob(token.split(".")[1])).id;
+          console.log("User ID from token:", userIdFromToken);
+          if (stream && stream.owner && stream.owner.id === userIdFromToken) {
             console.log("User is stream owner, starting broadcast...");
             setIsStreaming(true);
             await startStream();
