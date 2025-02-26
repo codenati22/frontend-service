@@ -1,0 +1,15 @@
+:root {
+  --primary: #4a90e2;
+  --secondary: #f5f7fa;
+  --text: #333;
+  --highlight: #ff6f61;
+  --white: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  --font-family: "Arial, sans-serif";
+  --font-size-base: 16px;
+}

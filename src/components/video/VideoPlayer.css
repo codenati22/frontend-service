@@ -1,0 +1,55 @@
+.video-player {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-player video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.video-player .error {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--highlight);
+  background: rgba(255, 255, 255, 0.9);
+  padding: var(--spacing-sm);
+  border-radius: 4px;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+.controls {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.controls button {
+  background: var(--primary);
+  color: var(--white);
+  padding: var(--spacing-sm);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.controls button:hover {
+  background: #357abd;
+}

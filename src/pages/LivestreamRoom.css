@@ -1,0 +1,43 @@
+.livestream-room {
+  display: flex;
+  gap: var(--spacing-md);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  position: relative;
+}
+
+.video-container {
+  flex: 3;
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.chat-container {
+  flex: 1;
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow);
+  height: 70vh;
+  overflow-y: auto;
+}
+
+.room-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+@media (max-width: 1024px) {
+  .livestream-room {
+    flex-direction: column;
+  }
+
+  .chat-container {
+    height: 50vh;
+  }
+}
