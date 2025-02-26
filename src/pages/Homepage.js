@@ -27,9 +27,12 @@ function Homepage() {
 
   const handleStartStream = async (e) => {
     e.preventDefault();
-    if (!token) return navigate("/login");
+    if (!token) {
+      handleError({ message: "Please log in to start a stream" });
+      return navigate("/login");
+    }
     try {
-      console.log("Starting stream with token:", token); // Debug token
+      console.log("Starting stream with token:", token);
       const { data } = await startStream(newStreamTitle, token);
       navigate(`/stream/${data.streamId}`);
     } catch (err) {

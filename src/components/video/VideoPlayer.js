@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useApiError, ErrorDisplay } from "../../utils/errorHandler";
+import { getStreams } from "../../utils/api";
 import "./VideoPlayer.css";
 
 const VideoPlayer = ({ streamId }, ref) => {
@@ -13,6 +15,7 @@ const VideoPlayer = ({ streamId }, ref) => {
   const isMounted = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
+  const token = localStorage.getItem("token");
 
   const initializePeerConnection = () => {
     if (pc.current && pc.current.signalingState !== "closed") return;
@@ -46,7 +49,7 @@ const VideoPlayer = ({ streamId }, ref) => {
     };
   };
 
-  const connectWebSocket = () => {
+  const connectWebSocket = async () => {
     if (retryCount >= maxRetries) {
       handleError({
         message: "Failed to connect to signaling server after retries",
@@ -58,13 +61,23 @@ const VideoPlayer = ({ streamId }, ref) => {
       `wss://stream-service-t29h.onrender.com/${streamId}`
     );
 
-    ws.current.onopen = () => {
+    ws.current.onopen = async () => {
       console.log("WebSocket connected for signaling");
       setRetryCount(0);
-      const token = localStorage.getItem("token");
-      if (token && !isStreaming) {
-        setIsStreaming(true);
-        startStream();
+      if (token) {
+        try {
+          const { data: streams } = await getStreams(); // Fetch active streams
+          const stream = streams.find((s) => s._id === streamId);
+          if (
+            stream &&
+            stream.owner.id === JSON.parse(atob(token.split(".")[1])).id
+          ) {
+            setIsStreaming(true);
+            startStream();
+          }
+        } catch (err) {
+          handleError({ message: "Failed to verify stream ownership" });
+        }
       }
     };
 
