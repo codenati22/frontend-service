@@ -1,23 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { useApiError, ErrorDisplay } from "../../utils/errorHandler";
 import "./VideoPlayer.css";
 
 const VideoPlayer = ({ streamId }) => {
   const videoRef = useRef(null);
   const wsRef = useRef(null);
   const pcRef = useRef(null);
-  const { error, handleError } = useApiError();
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
 
   useEffect(() => {
-    const pc = new RTCPeerConnection({
+    // Initialize WebRTC Peer Connection
+    pcRef.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
-    pcRef.current = pc;
 
-    pc.onicecandidate = (event) => {
+    pcRef.current.onicecandidate = (event) => {
       if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(
           JSON.stringify({ type: "candidate", candidate: event.candidate })
@@ -25,60 +23,71 @@ const VideoPlayer = ({ streamId }) => {
       }
     };
 
-    pc.ontrack = (event) => {
+    pcRef.current.ontrack = (event) => {
       videoRef.current.srcObject = event.streams[0];
     };
 
-    const ws = new WebSocket(
+    // Connect to WebSocket
+    wsRef.current = new WebSocket(
       `wss://stream-service-t29h.onrender.com/${streamId}`
     );
-    wsRef.current = ws;
 
-    ws.onopen = () => {
+    wsRef.current.onopen = () => {
       if (isStreamer) {
         navigator.mediaDevices
           .getUserMedia({ video: true, audio: true })
           .then((stream) => {
-            stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+            stream
+              .getTracks()
+              .forEach((track) => pcRef.current.addTrack(track, stream));
             videoRef.current.srcObject = stream;
-            pc.createOffer()
-              .then((offer) => pc.setLocalDescription(offer))
+            pcRef.current
+              .createOffer()
+              .then((offer) => pcRef.current.setLocalDescription(offer))
               .then(() =>
-                ws.send(
-                  JSON.stringify({ type: "offer", offer: pc.localDescription })
+                wsRef.current.send(
+                  JSON.stringify({
+                    type: "offer",
+                    offer: pcRef.current.localDescription,
+                  })
                 )
-              );
+              )
+              .catch((err) => console.error("Offer error:", err));
           })
-          .catch((err) =>
-            handleError({ message: `Media error: ${err.message}` })
-          );
+          .catch((err) => console.error("Media error:", err));
       }
     };
 
-    ws.onmessage = async (event) => {
+    wsRef.current.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       try {
         if (data.type === "offer" && !isStreamer) {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          ws.send(JSON.stringify({ type: "answer", answer }));
+          await pcRef.current.setRemoteDescription(
+            new RTCSessionDescription(data.offer)
+          );
+          const answer = await pcRef.current.createAnswer();
+          await pcRef.current.setLocalDescription(answer);
+          wsRef.current.send(JSON.stringify({ type: "answer", answer }));
         } else if (data.type === "answer" && isStreamer) {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          await pcRef.current.setRemoteDescription(
+            new RTCSessionDescription(data.answer)
+          );
         } else if (data.type === "candidate") {
-          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          await pcRef.current.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
         }
       } catch (err) {
-        handleError({ message: `Signaling error: ${err.message}` });
+        console.error("Signaling error:", err);
       }
     };
 
-    ws.onerror = () => handleError({ message: "WebSocket error" });
-    ws.onclose = () => console.log("WebSocket closed");
+    wsRef.current.onerror = (err) => console.error("WebSocket error:", err);
+    wsRef.current.onclose = () => console.log("WebSocket closed");
 
     return () => {
-      pc.close();
-      ws.close();
+      if (pcRef.current) pcRef.current.close();
+      if (wsRef.current) wsRef.current.close();
       if (videoRef.current?.srcObject) {
         videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
@@ -88,7 +97,6 @@ const VideoPlayer = ({ streamId }) => {
   return (
     <div className="video-player">
       <video ref={videoRef} autoPlay playsInline muted={isStreamer} />
-      <ErrorDisplay error={error} />
     </div>
   );
 };
