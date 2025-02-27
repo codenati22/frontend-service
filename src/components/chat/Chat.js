@@ -4,18 +4,27 @@ import "./Chat.css";
 function Chat({ streamId }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [error, setError] = useState(null);
   const wsRef = useRef(null);
   const chatRef = useRef(null);
   const token = localStorage.getItem("token");
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
-  useEffect(() => {
+  const connectWebSocket = () => {
     if (!token) return;
 
-    wsRef.current = new WebSocket(
-      `wss://chat-service-1u5f.onrender.com/${streamId}?token=${token}`
-    );
+    const wsUrl = `wss://chat-service-1u5f.onrender.com/${streamId}?token=${token}`;
+    wsRef.current = new WebSocket(wsUrl);
 
-    wsRef.current.onopen = () => console.log("Chat WebSocket connected");
+    wsRef.current.onopen = () => {
+      console.log("Chat WebSocket connected");
+      setIsConnecting(false);
+      setError(null);
+      reconnectAttempts.current = 0;
+    };
+
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setMessages((prev) => [
@@ -23,11 +32,32 @@ function Chat({ streamId }) {
         { user: data.user, content: data.content, timestamp: data.timestamp },
       ]);
     };
-    wsRef.current.onerror = (err) =>
+
+    wsRef.current.onerror = (err) => {
       console.error("Chat WebSocket error:", err);
-    wsRef.current.onclose = () => console.log("Chat WebSocket closed");
+      setError("Chat connection failed");
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("Chat WebSocket closed");
+      setIsConnecting(true);
+      if (reconnectAttempts.current < maxReconnectAttempts) {
+        reconnectAttempts.current += 1;
+        console.log(
+          `Chat reconnecting attempt ${reconnectAttempts.current}/${maxReconnectAttempts}`
+        );
+        setTimeout(connectWebSocket, 1000 * reconnectAttempts.current);
+      } else {
+        setError("Chat connection lost");
+      }
+    };
+  };
+
+  useEffect(() => {
+    connectWebSocket();
 
     return () => {
+      console.log("Chat component unmounting");
       if (wsRef.current) wsRef.current.close();
     };
   }, [streamId, token]);
@@ -44,7 +74,7 @@ function Chat({ streamId }) {
       wsRef.current.readyState !== WebSocket.OPEN
     )
       return;
-    wsRef.current.send(JSON.stringify({ user: "me", content: message }));
+    wsRef.current.send(JSON.stringify({ content: message }));
     setMessage("");
   };
 
@@ -55,6 +85,8 @@ function Chat({ streamId }) {
           Please <a href="/login">login</a> to chat
         </div>
       )}
+      {isConnecting && <div className="loading">Connecting to chat...</div>}
+      {error && <div className="error">{error}</div>}
       <div className="chat-messages" ref={chatRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className="chat-message">

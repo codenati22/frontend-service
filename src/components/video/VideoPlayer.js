@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import initializeStreaming from "../../utils/streaming";
 import "./VideoPlayer.css";
@@ -8,6 +8,8 @@ const VideoPlayer = ({ streamId }) => {
   const cleanupRef = useRef(null);
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     console.log(
@@ -15,11 +17,16 @@ const VideoPlayer = ({ streamId }) => {
         isStreamer ? "Streamer" : "Viewer"
       } component mounting for stream ${streamId}`
     );
-    cleanupRef.current = initializeStreaming(
+    const cleanup = initializeStreaming(
       streamId,
       isStreamer,
-      videoRef.current
+      videoRef.current,
+      {
+        onConnect: () => setIsConnecting(false),
+        onError: (err) => setError(err.message || "Connection failed"),
+      }
     );
+    cleanupRef.current = cleanup;
 
     return () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} component unmounting`);
@@ -29,6 +36,8 @@ const VideoPlayer = ({ streamId }) => {
 
   return (
     <div className="video-player">
+      {isConnecting && <div className="loading">Connecting to stream...</div>}
+      {error && <div className="error">{error}</div>}
       <video ref={videoRef} autoPlay playsInline muted={isStreamer} controls />
     </div>
   );

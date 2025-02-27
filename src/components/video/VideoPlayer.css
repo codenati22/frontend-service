@@ -7,19 +7,8 @@
 .video-player video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.video-player .error {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--highlight);
-  background: rgba(255, 255, 255, 0.9);
-  padding: var(--spacing-sm);
-  border-radius: 4px;
+  object-fit: contain;
+  background-color: #000;
 }
 
 .loading {
@@ -27,8 +16,23 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: var(--primary);
-  font-size: 1.2rem;
+  color: white;
+  font-size: 18px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: red;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .controls {

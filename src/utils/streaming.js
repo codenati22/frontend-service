@@ -11,7 +11,12 @@ const createPeerConnection = () => {
   });
 };
 
-const initializeStreaming = (streamId, isStreamer, videoElement) => {
+const initializeStreaming = (
+  streamId,
+  isStreamer,
+  videoElement,
+  { onConnect, onError } = {}
+) => {
   const pc = createPeerConnection();
   const ws = new WebSocket(
     `wss://stream-service-t29h.onrender.com/${streamId}${
@@ -25,6 +30,7 @@ const initializeStreaming = (streamId, isStreamer, videoElement) => {
     ws.onopen = () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket opened`);
       reconnectAttempts = 0;
+      onConnect?.();
       if (isStreamer) startStreaming();
     };
 
@@ -52,14 +58,17 @@ const initializeStreaming = (streamId, isStreamer, videoElement) => {
           `${isStreamer ? "Streamer" : "Viewer"} signaling error:`,
           err
         );
+        onError?.(err);
       }
     };
 
-    ws.onerror = (err) =>
+    ws.onerror = (err) => {
       console.error(
         `${isStreamer ? "Streamer" : "Viewer"} WebSocket error:`,
         err
       );
+      onError?.(err);
+    };
 
     ws.onclose = () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket closed`);
@@ -72,6 +81,8 @@ const initializeStreaming = (streamId, isStreamer, videoElement) => {
           wsRef.current = new WebSocket(ws.url);
           connectWebSocket();
         }, 1000 * reconnectAttempts);
+      } else {
+        onError?.(new Error("Max reconnection attempts reached"));
       }
     };
   };
@@ -101,7 +112,10 @@ const initializeStreaming = (streamId, isStreamer, videoElement) => {
           })
           .catch((err) => console.error("Streamer offer error:", err));
       })
-      .catch((err) => console.error("Streamer media error:", err));
+      .catch((err) => {
+        console.error("Streamer media error:", err);
+        onError?.(err);
+      });
   };
 
   pc.onicecandidate = (event) => {
@@ -133,7 +147,7 @@ const initializeStreaming = (streamId, isStreamer, videoElement) => {
       reconnectAttempts < maxReconnectAttempts
     ) {
       console.log("ICE disconnected, attempting to reconnect...");
-      startStreaming(); // Retry streaming if ICE fails
+      if (isStreamer) startStreaming();
     }
   };
 
