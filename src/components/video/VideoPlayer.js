@@ -10,6 +10,12 @@ const VideoPlayer = ({ streamId }) => {
   const isStreamer = state?.isStreamer || false;
 
   useEffect(() => {
+    console.log(
+      `${
+        isStreamer ? "Streamer" : "Viewer"
+      } initializing for stream ${streamId}`
+    );
+
     // Initialize WebRTC Peer Connection
     pcRef.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -17,6 +23,7 @@ const VideoPlayer = ({ streamId }) => {
 
     pcRef.current.onicecandidate = (event) => {
       if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
+        console.log("Sending ICE candidate:", event.candidate);
         wsRef.current.send(
           JSON.stringify({ type: "candidate", candidate: event.candidate })
         );
@@ -24,7 +31,12 @@ const VideoPlayer = ({ streamId }) => {
     };
 
     pcRef.current.ontrack = (event) => {
+      console.log("Received remote track:", event.streams[0]);
       videoRef.current.srcObject = event.streams[0];
+    };
+
+    pcRef.current.oniceconnectionstatechange = () => {
+      console.log("ICE Connection State:", pcRef.current.iceConnectionState);
     };
 
     // Connect to WebSocket
@@ -33,25 +45,35 @@ const VideoPlayer = ({ streamId }) => {
     );
 
     wsRef.current.onopen = () => {
+      console.log("WebSocket connected");
       if (isStreamer) {
         navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
+          .getUserMedia({
+            video: { width: 640, height: 360, frameRate: 15 }, // Low resolution
+            audio: true,
+          })
           .then((stream) => {
-            stream
-              .getTracks()
-              .forEach((track) => pcRef.current.addTrack(track, stream));
+            console.log("Media stream acquired:", stream);
+            stream.getTracks().forEach((track) => {
+              pcRef.current.addTrack(track, stream);
+              console.log(`Added track: ${track.kind}`);
+            });
             videoRef.current.srcObject = stream;
             pcRef.current
               .createOffer()
-              .then((offer) => pcRef.current.setLocalDescription(offer))
-              .then(() =>
+              .then((offer) => {
+                console.log("Created offer:", offer);
+                return pcRef.current.setLocalDescription(offer);
+              })
+              .then(() => {
+                console.log("Sent offer:", pcRef.current.localDescription);
                 wsRef.current.send(
                   JSON.stringify({
                     type: "offer",
                     offer: pcRef.current.localDescription,
                   })
-                )
-              )
+                );
+              })
               .catch((err) => console.error("Offer error:", err));
           })
           .catch((err) => console.error("Media error:", err));
@@ -60,6 +82,7 @@ const VideoPlayer = ({ streamId }) => {
 
     wsRef.current.onmessage = async (event) => {
       const data = JSON.parse(event.data);
+      console.log("Received message:", data);
       try {
         if (data.type === "offer" && !isStreamer) {
           await pcRef.current.setRemoteDescription(
@@ -67,6 +90,7 @@ const VideoPlayer = ({ streamId }) => {
           );
           const answer = await pcRef.current.createAnswer();
           await pcRef.current.setLocalDescription(answer);
+          console.log("Sent answer:", answer);
           wsRef.current.send(JSON.stringify({ type: "answer", answer }));
         } else if (data.type === "answer" && isStreamer) {
           await pcRef.current.setRemoteDescription(
@@ -76,6 +100,7 @@ const VideoPlayer = ({ streamId }) => {
           await pcRef.current.addIceCandidate(
             new RTCIceCandidate(data.candidate)
           );
+          console.log("Added ICE candidate");
         }
       } catch (err) {
         console.error("Signaling error:", err);

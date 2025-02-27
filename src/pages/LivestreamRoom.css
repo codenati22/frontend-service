@@ -12,6 +12,7 @@
   background: var(--white);
   border-radius: 8px;
   box-shadow: 0 4px 12px var(--shadow);
+  background-color: #6c2828;
 }
 
 .chat-container {
@@ -21,6 +22,7 @@
   box-shadow: 0 4px 12px var(--shadow);
   height: 70vh;
   overflow-y: auto;
+  background-color: #f9ecec;
 }
 
 .room-loading {
