@@ -1,14 +1,20 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "./VideoPlayer.css";
+
+const createPeerConnection = () => {
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  });
+  return pc;
+};
 
 const VideoPlayer = ({ streamId }) => {
   const videoRef = useRef(null);
   const wsRef = useRef(null);
-  const pcRef = useRef(null);
+  const pcRef = useRef(createPeerConnection());
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
-  const mountedRef = useRef(false);
 
   const connectWebSocket = () => {
     const wsUrl = `wss://stream-service-t29h.onrender.com/${streamId}${
@@ -91,9 +97,6 @@ const VideoPlayer = ({ streamId }) => {
                   offer: pcRef.current.localDescription,
                 })
               );
-            } else {
-              console.log("Streamer WebSocket not open, retrying...");
-              setTimeout(startStreaming, 1000);
             }
           })
           .catch((err) => console.error("Streamer offer error:", err));
@@ -101,18 +104,13 @@ const VideoPlayer = ({ streamId }) => {
       .catch((err) => console.error("Streamer media error:", err));
   };
 
-  useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-
+  // Initialize outside useEffect to avoid Strict Mode double-mount
+  if (!wsRef.current) {
     console.log(
-      `${isStreamer ? "Streamer" : "Viewer"} mounting for stream ${streamId}`
+      `${
+        isStreamer ? "Streamer" : "Viewer"
+      } initializing for stream ${streamId}`
     );
-
-    pcRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
-
     pcRef.current.onicecandidate = (event) => {
       if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
         console.log(
@@ -125,7 +123,6 @@ const VideoPlayer = ({ streamId }) => {
       }
     };
 
-    // Only viewers receive tracks
     if (!isStreamer) {
       pcRef.current.ontrack = (event) => {
         console.log("Viewer received track:", event.streams[0]);
@@ -141,15 +138,19 @@ const VideoPlayer = ({ streamId }) => {
     };
 
     connectWebSocket();
+  }
 
+  // Cleanup on component unmount
+  useEffect(() => {
     return () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} unmounting`);
-      mountedRef.current = false;
       if (pcRef.current) pcRef.current.close();
       if (wsRef.current) wsRef.current.close();
       if (videoRef.current?.srcObject) {
         videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
+      wsRef.current = null; // Reset for next mount
+      pcRef.current = null; // Reset for next mount
     };
   }, [streamId, isStreamer]);
 
