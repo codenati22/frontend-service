@@ -8,8 +8,12 @@ const VideoPlayer = ({ streamId }) => {
   const pcRef = useRef(null);
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
     console.log(
       `${
         isStreamer ? "Streamer" : "Viewer"
@@ -23,7 +27,10 @@ const VideoPlayer = ({ streamId }) => {
 
     pcRef.current.onicecandidate = (event) => {
       if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
-        console.log("Sending ICE candidate:", event.candidate);
+        console.log(
+          `${isStreamer ? "Streamer" : "Viewer"} sending ICE candidate:`,
+          event.candidate
+        );
         wsRef.current.send(
           JSON.stringify({ type: "candidate", candidate: event.candidate })
         );
@@ -31,21 +38,28 @@ const VideoPlayer = ({ streamId }) => {
     };
 
     pcRef.current.ontrack = (event) => {
-      console.log("Received remote track:", event.streams[0]);
+      console.log(
+        `${isStreamer ? "Streamer" : "Viewer"} received remote track:`,
+        event.streams[0]
+      );
       videoRef.current.srcObject = event.streams[0];
     };
 
     pcRef.current.oniceconnectionstatechange = () => {
-      console.log("ICE Connection State:", pcRef.current.iceConnectionState);
+      console.log(
+        `${isStreamer ? "Streamer" : "Viewer"} ICE Connection State:`,
+        pcRef.current.iceConnectionState
+      );
     };
 
     // Connect to WebSocket
-    wsRef.current = new WebSocket(
-      `wss://stream-service-t29h.onrender.com/${streamId}`
-    );
+    const wsUrl = `wss://stream-service-t29h.onrender.com/${streamId}${
+      isStreamer ? "?role=streamer" : "?role=viewer"
+    }`;
+    wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onopen = () => {
-      console.log("WebSocket connected");
+      console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket connected`);
       if (isStreamer) {
         navigator.mediaDevices
           .getUserMedia({
@@ -53,20 +67,23 @@ const VideoPlayer = ({ streamId }) => {
             audio: true,
           })
           .then((stream) => {
-            console.log("Media stream acquired:", stream);
+            console.log("Streamer media stream acquired:", stream);
             stream.getTracks().forEach((track) => {
               pcRef.current.addTrack(track, stream);
-              console.log(`Added track: ${track.kind}`);
+              console.log(`Streamer added track: ${track.kind}`);
             });
             videoRef.current.srcObject = stream;
             pcRef.current
               .createOffer()
               .then((offer) => {
-                console.log("Created offer:", offer);
+                console.log("Streamer created offer:", offer);
                 return pcRef.current.setLocalDescription(offer);
               })
               .then(() => {
-                console.log("Sent offer:", pcRef.current.localDescription);
+                console.log(
+                  "Streamer sent offer:",
+                  pcRef.current.localDescription
+                );
                 wsRef.current.send(
                   JSON.stringify({
                     type: "offer",
@@ -74,41 +91,56 @@ const VideoPlayer = ({ streamId }) => {
                   })
                 );
               })
-              .catch((err) => console.error("Offer error:", err));
+              .catch((err) => console.error("Streamer offer error:", err));
           })
-          .catch((err) => console.error("Media error:", err));
+          .catch((err) => console.error("Streamer media error:", err));
       }
     };
 
     wsRef.current.onmessage = async (event) => {
       const data = JSON.parse(event.data);
-      console.log("Received message:", data);
+      console.log(
+        `${isStreamer ? "Streamer" : "Viewer"} received message:`,
+        data
+      );
       try {
         if (data.type === "offer" && !isStreamer) {
           await pcRef.current.setRemoteDescription(
             new RTCSessionDescription(data.offer)
           );
+          console.log("Viewer set remote offer");
           const answer = await pcRef.current.createAnswer();
           await pcRef.current.setLocalDescription(answer);
-          console.log("Sent answer:", answer);
+          console.log("Viewer sent answer:", answer);
           wsRef.current.send(JSON.stringify({ type: "answer", answer }));
         } else if (data.type === "answer" && isStreamer) {
           await pcRef.current.setRemoteDescription(
             new RTCSessionDescription(data.answer)
           );
+          console.log("Streamer set remote answer");
         } else if (data.type === "candidate") {
           await pcRef.current.addIceCandidate(
             new RTCIceCandidate(data.candidate)
           );
-          console.log("Added ICE candidate");
+          console.log(
+            `${isStreamer ? "Streamer" : "Viewer"} added ICE candidate`
+          );
         }
       } catch (err) {
-        console.error("Signaling error:", err);
+        console.error(
+          `${isStreamer ? "Streamer" : "Viewer"} signaling error:`,
+          err
+        );
       }
     };
 
-    wsRef.current.onerror = (err) => console.error("WebSocket error:", err);
-    wsRef.current.onclose = () => console.log("WebSocket closed");
+    wsRef.current.onerror = (err) =>
+      console.error(
+        `${isStreamer ? "Streamer" : "Viewer"} WebSocket error:`,
+        err
+      );
+    wsRef.current.onclose = () =>
+      console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket closed`);
 
     return () => {
       if (pcRef.current) pcRef.current.close();
@@ -121,7 +153,7 @@ const VideoPlayer = ({ streamId }) => {
 
   return (
     <div className="video-player">
-      <video ref={videoRef} autoPlay playsInline muted={isStreamer} />
+      <video ref={videoRef} autoPlay playsInline muted={isStreamer} controls />
     </div>
   );
 };
