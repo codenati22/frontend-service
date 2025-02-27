@@ -6,8 +6,6 @@ const VideoPlayer = ({ streamId }) => {
   const videoRef = useRef(null);
   const wsRef = useRef(null);
   const pcRef = useRef(null);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
   const mountedRef = useRef(false);
@@ -20,7 +18,6 @@ const VideoPlayer = ({ streamId }) => {
 
     wsRef.current.onopen = () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket opened`);
-      reconnectAttempts.current = 0; // Reset on successful connection
       if (isStreamer) startStreaming();
     };
 
@@ -62,20 +59,8 @@ const VideoPlayer = ({ streamId }) => {
         `${isStreamer ? "Streamer" : "Viewer"} WebSocket error:`,
         err
       );
-
-    wsRef.current.onclose = () => {
+    wsRef.current.onclose = () =>
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket closed`);
-      if (
-        mountedRef.current &&
-        reconnectAttempts.current < maxReconnectAttempts
-      ) {
-        reconnectAttempts.current += 1;
-        console.log(
-          `Reconnecting attempt ${reconnectAttempts.current}/${maxReconnectAttempts}`
-        );
-        setTimeout(connectWebSocket, 1000 * reconnectAttempts.current);
-      }
-    };
   };
 
   const startStreaming = () => {
@@ -95,16 +80,21 @@ const VideoPlayer = ({ streamId }) => {
           .createOffer()
           .then((offer) => pcRef.current.setLocalDescription(offer))
           .then(() => {
-            console.log(
-              "Streamer sending offer:",
-              pcRef.current.localDescription
-            );
-            wsRef.current.send(
-              JSON.stringify({
-                type: "offer",
-                offer: pcRef.current.localDescription,
-              })
-            );
+            if (wsRef.current.readyState === WebSocket.OPEN) {
+              console.log(
+                "Streamer sending offer:",
+                pcRef.current.localDescription
+              );
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "offer",
+                  offer: pcRef.current.localDescription,
+                })
+              );
+            } else {
+              console.log("Streamer WebSocket not open, retrying...");
+              setTimeout(startStreaming, 1000);
+            }
           })
           .catch((err) => console.error("Streamer offer error:", err));
       })
@@ -112,10 +102,12 @@ const VideoPlayer = ({ streamId }) => {
   };
 
   useEffect(() => {
+    if (mountedRef.current) return;
+    mountedRef.current = true;
+
     console.log(
       `${isStreamer ? "Streamer" : "Viewer"} mounting for stream ${streamId}`
     );
-    mountedRef.current = true;
 
     pcRef.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -133,13 +125,13 @@ const VideoPlayer = ({ streamId }) => {
       }
     };
 
-    pcRef.current.ontrack = (event) => {
-      console.log(
-        `${isStreamer ? "Streamer" : "Viewer"} received track:`,
-        event.streams[0]
-      );
-      videoRef.current.srcObject = event.streams[0];
-    };
+    // Only viewers receive tracks
+    if (!isStreamer) {
+      pcRef.current.ontrack = (event) => {
+        console.log("Viewer received track:", event.streams[0]);
+        videoRef.current.srcObject = event.streams[0];
+      };
+    }
 
     pcRef.current.oniceconnectionstatechange = () => {
       console.log(
