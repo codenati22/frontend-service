@@ -6,47 +6,13 @@ const VideoPlayer = ({ streamId }) => {
   const videoRef = useRef(null);
   const wsRef = useRef(null);
   const pcRef = useRef(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
+  const mountedRef = useRef(false);
 
-  useEffect(() => {
-    console.log(
-      `${isStreamer ? "Streamer" : "Viewer"} starting for stream ${streamId}`
-    );
-
-    // Initialize WebRTC Peer Connection
-    pcRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
-
-    pcRef.current.onicecandidate = (event) => {
-      if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
-        console.log(
-          `${isStreamer ? "Streamer" : "Viewer"} sending ICE candidate:`,
-          event.candidate
-        );
-        wsRef.current.send(
-          JSON.stringify({ type: "candidate", candidate: event.candidate })
-        );
-      }
-    };
-
-    pcRef.current.ontrack = (event) => {
-      console.log(
-        `${isStreamer ? "Streamer" : "Viewer"} received track:`,
-        event.streams[0]
-      );
-      videoRef.current.srcObject = event.streams[0];
-    };
-
-    pcRef.current.oniceconnectionstatechange = () => {
-      console.log(
-        `${isStreamer ? "Streamer" : "Viewer"} ICE state:`,
-        pcRef.current.iceConnectionState
-      );
-    };
-
-    // WebSocket with role
+  const connectWebSocket = () => {
     const wsUrl = `wss://stream-service-t29h.onrender.com/${streamId}${
       isStreamer ? "?role=streamer" : "?role=viewer"
     }`;
@@ -54,37 +20,8 @@ const VideoPlayer = ({ streamId }) => {
 
     wsRef.current.onopen = () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket opened`);
-      if (isStreamer) {
-        navigator.mediaDevices
-          .getUserMedia({
-            video: { width: 640, height: 360, frameRate: 15 },
-            audio: true,
-          })
-          .then((stream) => {
-            console.log("Streamer stream acquired:", stream);
-            stream
-              .getTracks()
-              .forEach((track) => pcRef.current.addTrack(track, stream));
-            videoRef.current.srcObject = stream;
-            pcRef.current
-              .createOffer()
-              .then((offer) => pcRef.current.setLocalDescription(offer))
-              .then(() => {
-                console.log(
-                  "Streamer sending offer:",
-                  pcRef.current.localDescription
-                );
-                wsRef.current.send(
-                  JSON.stringify({
-                    type: "offer",
-                    offer: pcRef.current.localDescription,
-                  })
-                );
-              })
-              .catch((err) => console.error("Streamer offer error:", err));
-          })
-          .catch((err) => console.error("Streamer media error:", err));
-      }
+      reconnectAttempts.current = 0; // Reset on successful connection
+      if (isStreamer) startStreaming();
     };
 
     wsRef.current.onmessage = async (event) => {
@@ -125,11 +62,97 @@ const VideoPlayer = ({ streamId }) => {
         `${isStreamer ? "Streamer" : "Viewer"} WebSocket error:`,
         err
       );
-    wsRef.current.onclose = () =>
+
+    wsRef.current.onclose = () => {
       console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket closed`);
+      if (
+        mountedRef.current &&
+        reconnectAttempts.current < maxReconnectAttempts
+      ) {
+        reconnectAttempts.current += 1;
+        console.log(
+          `Reconnecting attempt ${reconnectAttempts.current}/${maxReconnectAttempts}`
+        );
+        setTimeout(connectWebSocket, 1000 * reconnectAttempts.current);
+      }
+    };
+  };
+
+  const startStreaming = () => {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: { width: 640, height: 360, frameRate: 15 },
+        audio: true,
+      })
+      .then((stream) => {
+        console.log("Streamer stream acquired:", stream);
+        stream.getTracks().forEach((track) => {
+          pcRef.current.addTrack(track, stream);
+          console.log(`Streamer added track: ${track.kind}`);
+        });
+        videoRef.current.srcObject = stream;
+        pcRef.current
+          .createOffer()
+          .then((offer) => pcRef.current.setLocalDescription(offer))
+          .then(() => {
+            console.log(
+              "Streamer sending offer:",
+              pcRef.current.localDescription
+            );
+            wsRef.current.send(
+              JSON.stringify({
+                type: "offer",
+                offer: pcRef.current.localDescription,
+              })
+            );
+          })
+          .catch((err) => console.error("Streamer offer error:", err));
+      })
+      .catch((err) => console.error("Streamer media error:", err));
+  };
+
+  useEffect(() => {
+    console.log(
+      `${isStreamer ? "Streamer" : "Viewer"} mounting for stream ${streamId}`
+    );
+    mountedRef.current = true;
+
+    pcRef.current = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+
+    pcRef.current.onicecandidate = (event) => {
+      if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
+        console.log(
+          `${isStreamer ? "Streamer" : "Viewer"} sending ICE candidate:`,
+          event.candidate
+        );
+        wsRef.current.send(
+          JSON.stringify({ type: "candidate", candidate: event.candidate })
+        );
+      }
+    };
+
+    pcRef.current.ontrack = (event) => {
+      console.log(
+        `${isStreamer ? "Streamer" : "Viewer"} received track:`,
+        event.streams[0]
+      );
+      videoRef.current.srcObject = event.streams[0];
+    };
+
+    pcRef.current.oniceconnectionstatechange = () => {
+      console.log(
+        `${isStreamer ? "Streamer" : "Viewer"} ICE state:`,
+        pcRef.current.iceConnectionState
+      );
+    };
+
+    connectWebSocket();
 
     return () => {
-      console.log(`${isStreamer ? "Streamer" : "Viewer"} cleaning up`);
+      console.log(`${isStreamer ? "Streamer" : "Viewer"} unmounting`);
+      mountedRef.current = false;
       if (pcRef.current) pcRef.current.close();
       if (wsRef.current) wsRef.current.close();
       if (videoRef.current?.srcObject) {
