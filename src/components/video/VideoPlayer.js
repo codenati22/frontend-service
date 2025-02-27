@@ -1,157 +1,29 @@
-import React, { useRef, useEffect } from "react"; // Added useEffect import
+import React, { useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import initializeStreaming from "../../utils/streaming";
 import "./VideoPlayer.css";
-
-// Move WebSocket and WebRTC logic outside React lifecycle
-const createPeerConnection = () => {
-  const pc = new RTCPeerConnection({
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-  });
-  return pc;
-};
 
 const VideoPlayer = ({ streamId }) => {
   const videoRef = useRef(null);
-  const wsRef = useRef(null);
-  const pcRef = useRef(createPeerConnection());
+  const cleanupRef = useRef(null);
   const { state } = useLocation();
   const isStreamer = state?.isStreamer || false;
 
-  const connectWebSocket = () => {
-    const wsUrl = `wss://stream-service-t29h.onrender.com/${streamId}${
-      isStreamer ? "?role=streamer" : "?role=viewer"
-    }`;
-    wsRef.current = new WebSocket(wsUrl);
-
-    wsRef.current.onopen = () => {
-      console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket opened`);
-      if (isStreamer) startStreaming();
-    };
-
-    wsRef.current.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      console.log(`${isStreamer ? "Streamer" : "Viewer"} received:`, data);
-      try {
-        if (data.type === "offer" && !isStreamer) {
-          await pcRef.current.setRemoteDescription(
-            new RTCSessionDescription(data.offer)
-          );
-          const answer = await pcRef.current.createAnswer();
-          await pcRef.current.setLocalDescription(answer);
-          console.log("Viewer sending answer:", answer);
-          wsRef.current.send(JSON.stringify({ type: "answer", answer }));
-        } else if (data.type === "answer" && isStreamer) {
-          await pcRef.current.setRemoteDescription(
-            new RTCSessionDescription(data.answer)
-          );
-          console.log("Streamer set remote answer");
-        } else if (data.type === "candidate") {
-          await pcRef.current.addIceCandidate(
-            new RTCIceCandidate(data.candidate)
-          );
-          console.log(
-            `${isStreamer ? "Streamer" : "Viewer"} added ICE candidate`
-          );
-        }
-      } catch (err) {
-        console.error(
-          `${isStreamer ? "Streamer" : "Viewer"} signaling error:`,
-          err
-        );
-      }
-    };
-
-    wsRef.current.onerror = (err) =>
-      console.error(
-        `${isStreamer ? "Streamer" : "Viewer"} WebSocket error:`,
-        err
-      );
-    wsRef.current.onclose = () =>
-      console.log(`${isStreamer ? "Streamer" : "Viewer"} WebSocket closed`);
-  };
-
-  const startStreaming = () => {
-    navigator.mediaDevices
-      .getUserMedia({
-        video: { width: 640, height: 360, frameRate: 15 },
-        audio: true,
-      })
-      .then((stream) => {
-        console.log("Streamer stream acquired:", stream);
-        stream.getTracks().forEach((track) => {
-          pcRef.current.addTrack(track, stream);
-          console.log(`Streamer added track: ${track.kind}`);
-        });
-        videoRef.current.srcObject = stream;
-        pcRef.current
-          .createOffer()
-          .then((offer) => pcRef.current.setLocalDescription(offer))
-          .then(() => {
-            if (wsRef.current.readyState === WebSocket.OPEN) {
-              console.log(
-                "Streamer sending offer:",
-                pcRef.current.localDescription
-              );
-              wsRef.current.send(
-                JSON.stringify({
-                  type: "offer",
-                  offer: pcRef.current.localDescription,
-                })
-              );
-            }
-          })
-          .catch((err) => console.error("Streamer offer error:", err));
-      })
-      .catch((err) => console.error("Streamer media error:", err));
-  };
-
-  // Initialize outside useEffect to avoid Strict Mode double-mount
-  if (!wsRef.current) {
+  useEffect(() => {
     console.log(
       `${
         isStreamer ? "Streamer" : "Viewer"
-      } initializing for stream ${streamId}`
+      } component mounting for stream ${streamId}`
     );
-    pcRef.current.onicecandidate = (event) => {
-      if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
-        console.log(
-          `${isStreamer ? "Streamer" : "Viewer"} sending ICE candidate:`,
-          event.candidate
-        );
-        wsRef.current.send(
-          JSON.stringify({ type: "candidate", candidate: event.candidate })
-        );
-      }
-    };
+    cleanupRef.current = initializeStreaming(
+      streamId,
+      isStreamer,
+      videoRef.current
+    );
 
-    if (!isStreamer) {
-      pcRef.current.ontrack = (event) => {
-        console.log("Viewer received track:", event.streams[0]);
-        videoRef.current.srcObject = event.streams[0];
-      };
-    }
-
-    pcRef.current.oniceconnectionstatechange = () => {
-      console.log(
-        `${isStreamer ? "Streamer" : "Viewer"} ICE state:`,
-        pcRef.current.iceConnectionState
-      );
-    };
-
-    connectWebSocket();
-  }
-
-  // Cleanup on component unmount
-  useEffect(() => {
     return () => {
-      console.log(`${isStreamer ? "Streamer" : "Viewer"} unmounting`);
-      if (pcRef.current) pcRef.current.close();
-      if (wsRef.current) wsRef.current.close();
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
-      wsRef.current = null; // Reset for next mount
-      pcRef.current = null; // Reset for next mount
+      console.log(`${isStreamer ? "Streamer" : "Viewer"} component unmounting`);
+      if (cleanupRef.current) cleanupRef.current();
     };
   }, [streamId, isStreamer]);
 
