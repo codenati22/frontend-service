@@ -32,11 +32,9 @@ function Homepage() {
       return navigate("/login");
     }
     try {
-      console.log("Starting stream with token:", token);
       const { data } = await startStream(newStreamTitle, token);
       navigate(`/stream/${data.streamId}`, { state: { isStreamer: true } });
     } catch (err) {
-      console.error("Start stream error:", err);
       handleError(err);
     }
   };
