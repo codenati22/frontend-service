@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react"; // Added useEffect import
 import { useLocation } from "react-router-dom";
 import "./VideoPlayer.css";
 
+// Move WebSocket and WebRTC logic outside React lifecycle
 const createPeerConnection = () => {
   const pc = new RTCPeerConnection({
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
