@@ -9,6 +9,7 @@ function Chat({ streamId }) {
   const wsRef = useRef(null);
   const chatRef = useRef(null);
   const token = localStorage.getItem("token");
+  const processedMessages = useRef(new Set());
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
@@ -16,10 +17,11 @@ function Chat({ streamId }) {
     if (!token) return;
 
     const wsUrl = `wss://chat-service-1u5f.onrender.com/${streamId}?token=${token}`;
+    console.log(`Attempting to connect to chat WebSocket: ${wsUrl}`);
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onopen = () => {
-      console.log("Chat WebSocket connected");
+      console.log("Chat WebSocket connected successfully");
       setIsConnecting(false);
       setError(null);
       reconnectAttempts.current = 0;
@@ -27,10 +29,21 @@ function Chat({ streamId }) {
 
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setMessages((prev) => [
-        ...prev,
-        { user: data.user, content: data.content, timestamp: data.timestamp },
-      ]);
+      const messageKey = data.timestamp;
+      if (!processedMessages.current.has(messageKey)) {
+        processedMessages.current.add(messageKey);
+        setMessages((prev) => [
+          ...prev,
+          {
+            userId: data.userId,
+            user: data.user,
+            content: data.content,
+            timestamp: data.timestamp,
+          },
+        ]);
+      } else {
+        console.log("Filtered duplicate message with timestamp:", messageKey);
+      }
     };
 
     wsRef.current.onerror = (err) => {
@@ -38,8 +51,8 @@ function Chat({ streamId }) {
       setError("Chat connection failed");
     };
 
-    wsRef.current.onclose = () => {
-      console.log("Chat WebSocket closed");
+    wsRef.current.onclose = (event) => {
+      console.log("Chat WebSocket closed:", event.code, event.reason);
       setIsConnecting(true);
       if (reconnectAttempts.current < maxReconnectAttempts) {
         reconnectAttempts.current += 1;
@@ -49,11 +62,18 @@ function Chat({ streamId }) {
         setTimeout(connectWebSocket, 1000 * reconnectAttempts.current);
       } else {
         setError("Chat connection lost");
+        console.log("Max reconnect attempts reached");
       }
     };
   };
 
   useEffect(() => {
+    console.log(
+      "Chat component mounting with streamId:",
+      streamId,
+      "token:",
+      token
+    );
     connectWebSocket();
 
     return () => {
@@ -72,37 +92,52 @@ function Chat({ streamId }) {
       !message.trim() ||
       !wsRef.current ||
       wsRef.current.readyState !== WebSocket.OPEN
-    )
+    ) {
+      console.log("Cannot send message: invalid state or empty message");
       return;
-    wsRef.current.send(JSON.stringify({ content: message }));
+    }
+    const messageData = { content: message };
+    console.log("Sending chat message:", messageData);
+    wsRef.current.send(JSON.stringify(messageData));
     setMessage("");
   };
 
   return (
-    <div className="chat">
+    <div className="chat glassmorphic">
       {!token && (
-        <div>
+        <div className="chat-login cartoonish-text">
           Please <a href="/login">login</a> to chat
         </div>
       )}
-      {isConnecting && <div className="loading">Connecting to chat...</div>}
-      {error && <div className="error">{error}</div>}
+      {isConnecting && (
+        <div className="chat-loading cartoonish-text">
+          Connecting to chat...
+        </div>
+      )}
+      {error && <div className="chat-error cartoonish-text">{error}</div>}
       <div className="chat-messages" ref={chatRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className="chat-message">
-            <span className="chat-user">{msg.user}</span>: {msg.content}
+            <span className="chat-user cartoonish-text">{msg.user}</span>:{" "}
+            <span className="chat-content">{msg.content}</span>
           </div>
         ))}
       </div>
       {token && (
-        <form onSubmit={sendMessage} className="chat-form">
+        <form onSubmit={sendMessage} className="chat-form glassmorphic">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
+            className="chat-input"
           />
-          <button type="submit">Send</button>
+          <button
+            type="submit"
+            className="chat-send-button neuromorphic-button"
+          >
+            Send
+          </button>
         </form>
       )}
     </div>

@@ -1,45 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Roboto:wght@400&display=swap");
+
 .livestream-room {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
   max-width: 1400px;
   margin: 0 auto;
-  padding: var(--spacing-md);
-  position: relative;
-}
-
-.video-container {
-  flex: 3;
-  background: var(--white);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px var(--shadow);
-  background-color: #6c2828;
+  padding: calc(var(--spacing-xl) + 60px) var(--spacing-xl) var(--spacing-xl);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-pink));
 }
 
 .chat-container {
   flex: 1;
-  background: var(--white);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px var(--shadow);
-  height: 70vh;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
+    inset 0 2px 6px rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  height: calc(100vh - 100px);
   overflow-y: auto;
-  background-color: #f9ecec;
+  padding: var(--spacing-md);
 }
 
-.room-loading {
+.video-container {
+  flex: 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.stream-controls {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--primary);
-  font-size: 1.2rem;
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.stop-button {
+  background: var(--crimson);
 }
 
 @media (max-width: 1024px) {
   .livestream-room {
     flex-direction: column;
+    padding: calc(var(--spacing-lg) + 80px) var(--spacing-md) var(--spacing-md);
+  }
+
+  .video-container {
+    width: 100%;
+    height: 50vh;
+    margin-bottom: var(--spacing-lg);
   }
 
   .chat-container {
-    height: 50vh;
+    width: 100%;
+    height: 40vh;
+    margin-bottom: 0;
+  }
+
+  .stream-controls {
+    bottom: var(--spacing-sm);
+    left: 50%;
+    transform: translateX(-50%);
   }
 }

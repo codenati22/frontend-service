@@ -1,51 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Roboto:wght@400&display=swap");
+
 .signup-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-purple));
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("../assets/stream-doodle.png") no-repeat center;
+  background-size: 50%;
+  opacity: 0.1;
+  z-index: 0;
 }
 
 .form-container {
-  background: var(--white);
-  padding: var(--spacing-lg);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px var(--shadow);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
+    inset 0 2px 6px rgba(255, 255, 255, 0.25);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+  z-index: 1;
 }
 
-.form-container h1 {
+.cartoonish-title {
+  font-family: "Comic Neue", sans-serif;
+  font-size: 2.5rem;
+  color: var(--crimson);
   text-align: center;
-  margin-bottom: var(--spacing-md);
-  color: var(--primary);
+  margin-bottom: var(--spacing-xl);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.form-container input {
+.glassmorphic-input {
   width: 100%;
-  padding: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-  border: 1px solid var(--secondary);
-  border-radius: 4px;
-  font-size: var(--font-size-base);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  border-radius: 14px;
+  margin: var(--spacing-md);
+  font-size: 1.1rem;
+  color: var(--dark);
+  font-family: "Roboto", sans-serif;
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.form-container p {
+.glassmorphic-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.cartoonish-text {
+  font-family: "Comic Neue", sans-serif;
+  font-size: 1rem;
+  color: var(--secondary);
   text-align: center;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-xl);
 }
 
-.form-container a {
-  color: var(--primary);
+.cartoonish-text a {
+  color: var(--crimson);
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.form-container a:hover {
-  text-decoration: underline;
+.cartoonish-text a:hover {
+  color: var(--pastel-pink);
 }
 
 @media (max-width: 768px) {
   .form-container {
-    padding: var(--spacing-md);
-    margin: 0 var(--spacing-sm);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md);
+    max-width: 90%;
+  }
+
+  .cartoonish-title {
+    font-size: 2rem;
+  }
+
+  .glassmorphic-input {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .cartoonish-text {
+    margin-top: var(--spacing-lg);
+  }
+
+  .signup-page::before {
+    background-size: 70%;
   }
 }

@@ -1,7 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Roboto:wght@400&display=swap");
+
 .video-player {
   position: relative;
   width: 100%;
   height: 100%;
+  background: #000;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .video-player video {
@@ -11,49 +16,97 @@
   background-color: #000;
 }
 
-.loading {
+.video-loading,
+.video-error {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 18px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 10px;
-  border-radius: 5px;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: "Comic Neue", sans-serif;
+  font-size: 1.2rem;
+  color: var(--white);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: opacity 0.3s ease;
+  max-width: 50%;
+  text-align: right;
 }
 
-.error {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: red;
-  font-size: 18px;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 5px;
+.video-error {
+  color: var(--crimson);
 }
 
-.controls {
+.video-controls {
   position: absolute;
   bottom: var(--spacing-md);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: var(--spacing-sm);
-}
-
-.controls button {
-  background: var(--primary);
-  color: var(--white);
+  gap: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
   padding: var(--spacing-sm);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
 }
 
-.controls button:hover {
-  background: #357abd;
+.video-player:hover .video-controls {
+  opacity: 1;
+}
+
+.control-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--crimson);
+  border: none;
+  border-radius: 10px;
+  font-family: "Comic Neue", sans-serif;
+  font-size: 1rem;
+  color: var(--white);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.control-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2),
+    inset 0 3px 6px rgba(255, 255, 255, 0.4);
+}
+
+.control-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .video-player {
+    border-radius: 12px;
+  }
+
+  .video-loading,
+  .video-error {
+    font-size: 1rem;
+    padding: var(--spacing-sm);
+    max-width: 40%;
+  }
+
+  .video-controls {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-sm);
+  }
+
+  .control-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.9rem;
+  }
 }

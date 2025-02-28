@@ -10,6 +10,7 @@ const VideoPlayer = ({ streamId }) => {
   const isStreamer = state?.isStreamer || false;
   const [isConnecting, setIsConnecting] = useState(true);
   const [error, setError] = useState(null);
+  const [showControls, setShowControls] = useState(false);
 
   useEffect(() => {
     console.log(
@@ -34,11 +35,35 @@ const VideoPlayer = ({ streamId }) => {
     };
   }, [streamId, isStreamer]);
 
+  const handleMouseEnter = () => setShowControls(true);
+  const handleMouseLeave = () => setShowControls(false);
+
   return (
-    <div className="video-player">
-      {isConnecting && <div className="loading">Connecting to stream...</div>}
-      {error && <div className="error">{error}</div>}
-      <video ref={videoRef} autoPlay playsInline muted={isStreamer} controls />
+    <div
+      className="video-player"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {isConnecting && (
+        <div className="video-loading cartoonish-text">
+          Connecting to stream...
+        </div>
+      )}
+      {error && <div className="video-error cartoonish-text">{error}</div>}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted={isStreamer}
+        controls={false}
+      />
+      {showControls && !isConnecting && !error && (
+        <div className="video-controls glassmorphic">
+          <button className="control-button neuromorphic-button">
+            {videoRef.current?.paused ? "Play" : "Pause"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

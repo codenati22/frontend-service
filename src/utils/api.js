@@ -23,4 +23,13 @@ export const startStream = (title, token) =>
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
+export const stopStream = (streamId, token) => {
+  console.log("Stopping stream with token:", token);
+  return api.post(
+    `/streams/stop-stream`,
+    { streamId },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+};
+
 export default api;
