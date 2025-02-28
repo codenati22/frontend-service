@@ -18,9 +18,14 @@ Enable viewers to dive into live action and chat instantly.
 Deliver a developer-friendly, modular platform using microservices and serverless tech.
 Built with cutting-edge tools, Loca.Live blends WebRTC streaming with a neuromorphic/glassmorphic design, creating a seamless experience for all users.
 
-Tools and Technologies
+### Tech Stack
 
-<div style="font-family: Arial, sans-serif; color: #333; margin: 20px 0;"> <ul style="list-style: none; padding: 0;"> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Frontend:</strong> <p style="color:rgb(255, 255, 255);">React, Axios, CSS (Glassmorphism & Neuromorphism), WebRTC </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Backend:</strong><p style="color:rgb(255, 255, 255);"> Node.js, Express, MongoDB, Mongoose, WebSocket (ws) </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Infrastructure:</strong><p style="color:rgb(255, 255, 255);"> Render (Serverless), Microservices (API Gateway, Auth, Stream, Chat) </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Dev Tools:</strong><p style="color:rgb(255, 255, 255);"> Git, GitHub, npm, ESLint, VS Code </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">External APIs:</strong><p style="color:rgb(255, 255, 255);"> STUN/TURN (Google STUN, OpenRelay TURN) </p></li> </ul> </div>
+- **Frontend:** React, Axios, CSS (Glassmorphism & Neuromorphism), WebRTC
+- **Backend:** Node.js, Express, MongoDB, Mongoose, WebSocket (ws)
+- **Infrastructure:** Render (Serverless), Microservices (API Gateway, Auth, Stream, Chat)
+- **Dev Tools:** Git, GitHub, npm, ESLint, VS Code
+- **External APIs:** STUN/TURN (Google STUN, OpenRelay TURN)
+  
 Features
 Live Streaming: Real-time video/audio via WebRTC with low latency.
 Interactive Chat: WebSocket-powered messaging for instant viewer engagement.
