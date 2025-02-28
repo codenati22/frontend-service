@@ -4,9 +4,11 @@
   <img src="./src/assets/logo.png" alt="Loca.Live Logo" width="150" height="150" />
 </div>
 
-<p align="center">
-  <strong>Welcome to Loca.Live</strong>—a vibrant live streaming platform that connects creators and viewers in real-time with a playful, modern twist!
-</p>
+<pre align="center">
+                                     <strong>Welcome to Loca.Live</strong>
+                        a vibrant live streaming platform that connects creators and viewers
+                                  in real-time with a playful, modern twist!
+</pre>
 
 Project Objective
 Loca.Live is all about making live streaming effortless, engaging, and scalable. My mission:
