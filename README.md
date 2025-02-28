@@ -1,6 +1,13 @@
-<h1>Loca.Live</h1>
+# Loca.Live
 
-<div style="text-align: center; margin-bottom: 20px;"> <img src="./src/assets/logo.png" alt="Loca.Live Logo" style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" /> </div> <div style="font-family: Arial, sans-serif; color: #333; text-align: center; font-size: 1.2em; margin-bottom: 20px;"> <strong>Welcome to Loca.Live</strong>—a vibrant live streaming platform that connects creators and viewers in real-time with a playful, modern twist! </div>
+<div align="center">
+  <img src="./src/assets/logo.png" alt="Loca.Live Logo" width="150" height="150" />
+</div>
+
+<p align="center">
+  <strong>Welcome to Loca.Live</strong>—a vibrant live streaming platform that connects creators and viewers in real-time with a playful, modern twist!
+</p>
+
 Project Objective
 Loca.Live is all about making live streaming effortless, engaging, and scalable. My mission:
 
@@ -93,3 +100,8 @@ License
 Licensed under the MIT License—use it, tweak it, share it!
 
 <div style="text-align: center; font-family: Arial, sans-serif; color: #333; font-size: 1.1em; margin-top: 20px;"> <strong>Loca.Live</strong>—Stream local, connect global. Let’s make waves together! </div>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version" />
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
+</div>
