@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+<h1>Loca.Live</h1>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<div style="text-align: center; margin-bottom: 20px;"> <img src="./src/assets/logo.png" alt="Loca.Live Logo" style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" /> </div> <div style="font-family: Arial, sans-serif; color: #333; text-align: center; font-size: 1.2em; margin-bottom: 20px;"> <strong>Welcome to Loca.Live</strong>—a vibrant live streaming platform that connects creators and viewers in real-time with a playful, modern twist! </div>
+Project Objective
+Loca.Live is all about making live streaming effortless, engaging, and scalable. My mission:
 
-## Available Scripts
+Empower streamers to broadcast, resume, and stop streams with a sleek, intuitive UI.
+Enable viewers to dive into live action and chat instantly.
+Deliver a developer-friendly, modular platform using microservices and serverless tech.
+Built with cutting-edge tools, Loca.Live blends WebRTC streaming with a neuromorphic/glassmorphic design, creating a seamless experience for all users.
 
-In the project directory, you can run:
+Tools and Technologies
 
-### `npm start`
+<div style="font-family: Arial, sans-serif; color: #333; margin: 20px 0;"> <ul style="list-style: none; padding: 0;"> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Frontend:</strong> <p style="color:rgb(255, 255, 255);">React, Axios, CSS (Glassmorphism & Neuromorphism), WebRTC </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Backend:</strong><p style="color:rgb(255, 255, 255);"> Node.js, Express, MongoDB, Mongoose, WebSocket (ws) </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Infrastructure:</strong><p style="color:rgb(255, 255, 255);"> Render (Serverless), Microservices (API Gateway, Auth, Stream, Chat) </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">Dev Tools:</strong><p style="color:rgb(255, 255, 255);"> Git, GitHub, npm, ESLint, VS Code </p></li> <li style="margin-bottom: 10px;"> <strong style="color: #dc143c;">External APIs:</strong><p style="color:rgb(255, 255, 255);"> STUN/TURN (Google STUN, OpenRelay TURN) </p></li> </ul> </div>
+Features
+Live Streaming: Real-time video/audio via WebRTC with low latency.
+Interactive Chat: WebSocket-powered messaging for instant viewer engagement.
+Stunning UI: Cartoonish, minimalist design with glassmorphic and neuromorphic flair, responsive across devices.
+Stream Control: Start, resume, and stop streams with secure user authentication.
+Scalable Backend: Microservices architecture for flexibility and growth.
+Serverless Power: Deployed on Render for effortless scaling and maintenance.
+Microservices Architecture
+Loca.Live thrives on a modular microservices setup:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+API Gateway: Routes all requests (auth, streams, chat) with Express, ensuring secure access.
+Auth Service: Handles signup, login, and token verification, powered by MongoDB and JWT.
+Stream Service: Manages stream lifecycle (start, stop, list) and WebRTC signaling via WebSocket.
+Chat Service: Enables real-time chat with WebSocket and MongoDB persistence.
+Each service is a standalone Node.js app, keeping the system decoupled and robust.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Serverless Deployment
+Hosted on Render, Loca.Live leverages serverless magic:
 
-### `npm test`
+Auto-Scaling: Adapts to traffic spikes seamlessly.
+Easy Deploys: GitHub-integrated, one-click deployments.
+Cost-Smart: Free tier for microservices, HTTPS included.
+Real-Time Ready: Supports WebSocket for streaming and chat.
+No server headaches—just pure focus on building an awesome experience!
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+<b>Live Demo</b>
 
-### `npm run build`
+<p>Notice: If it is not working might be in sleep mode to open since i am using free tier of render contact me so i can wake all micro services</p>
+click me:<span>-</span>
+<a href="https://frontend-service-ykmr.onrender.com/">loca.live</a>
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Screenshots
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+<div style="gap: 20px; margin: 20px 0;"> <div style="text-align: center;"> <img src="./src/assets/snapshot1.jpg" alt="Sample Snapshot 1" style="width: 1024px; height: 415px; border-radius: 10px; box-shadow: 0 4px 12px rgba(186, 183, 183, 0.47);" /> <p style="font-family: Arial, sans-serif; color: #333; font-size: 1em;">Live Streaming in Action</p> </div> <div style="text-align: center;"> <img src="./src/assets/snapshot2.jpg" alt="Sample Snapshot 2" style="width: 1024px; height: 415px; border-radius: 10px; box-shadow: 0 4px 12px rgba(232, 224, 224, 0.66);" /> <p style="font-family: Arial, sans-serif; color: #333; font-size: 1em;">Real-Time Chat Vibes</p> </div> </div>
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Developer
 
-### `npm run eject`
+<div style="font-family: Arial, sans-serif; color: #333; text-align: center; margin: 20px 0;"> <p><strong>Crafted with ❤️ by Natnael Girma</strong></p> <p> <a href="https://github.com/codenati22" style="color: #dc143c; text-decoration: none;">GitHub</a> | <a href="https://t.me/n_a_t_n_a_e_l_g_i_r_m_a" style="color: #dc143c; text-decoration: none;">Telegram</a> | <a href="https://www.linkedin.com/in/natnael-girma-707a1a326?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" style="color: #dc143c; text-decoration: none;">LinkedIn</a> </p> <p style="font-size: 0.9em;">Ping me—I’d love to chat about streaming, code, or collabs!</p> </div>
+<img style="text-align: center;" src="./src/assets/image.png" width="200" alt="Telegram QR Code"></a>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Getting Started
+Clone the Repo:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+Wrap
+Copy
+git clone https://github.com/codenati22/frontend-service.git
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```cmd
+cd frontend-service
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Install Dependencies:
 
-## Learn More
+```
+Frontend: npm install
+API Gateway: clone my repo api-gateway and cd api-gateway && npm install
+Stream Service: cd stream-service && npm install
+Chat Service: cd chat-service && npm install
+Set Environment Variables:
+Create .env files in each service folder (check .env.example).
+Add MONGO_URI, JWT_SECRET, service URLs, etc.
+Run Locally:
+Frontend: cd live-stream-frontend && npm start
+API Gateway: cd api-gateway && npm start
+Stream Service: cd stream-service && npm start
+Chat Service: cd chat-service && npm start
+Deploy:
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Push to GitHub, connect to Render for each service.
+Contributing
+Dig Loca.Live? Want to level it up?
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Fork it, branch out, and send a PR with your magic!
+Drop bugs or ideas in Issues.
+License
+Licensed under the MIT License—use it, tweak it, share it!
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<div style="text-align: center; font-family: Arial, sans-serif; color: #333; font-size: 1.1em; margin-top: 20px;"> <strong>Loca.Live</strong>—Stream local, connect global. Let’s make waves together! </div>
