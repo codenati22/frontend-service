@@ -20,7 +20,7 @@ function Navbar() {
   return (
     <nav className="navbar glassmorphic">
       <Link to="/" className="logo cartoonish-text">
-        StreamApp
+        Loca.Live
       </Link>
       <div className="nav-links">
         {token ? (
