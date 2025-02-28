@@ -5,7 +5,7 @@
 </div>
 
 <pre align="center">
-      <strong>Welcome to Loca.Live</strong>
+   <strong>Welcome to Loca.Live</strong>
 a vibrant live streaming platform that connects creators and viewers
    in real-time with a playful, modern twist!
 </pre>
