@@ -84,7 +84,7 @@ No server headaches—just pure focus on building an awesome experience!
 ## Developer 💻
 
 <div align="center">
-  <p><strong>Crafted with ❤️ by [Your Name]</strong></p>
+  <p><strong>Crafted with ❤️ by Natnael Girma</strong></p>
   <p>
     <a href="https://github.com/codenati22">GitHub</a> | 
     <a href="https://t.me/n_a_t_n_a_e_l_g_i_r_m_a">Telegram</a> | 
