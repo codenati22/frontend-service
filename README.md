@@ -59,7 +59,7 @@ Hosted on Render, Loca.Live leverages serverless magic:
 - **Cost-Smart:** Free tier for microservices, HTTPS included.
 - **Real-Time Ready:** Supports WebSocket for streaming and chat.
 
-No server headaches—just pure focus on building an awesome experience!
+No server headaches just pure focus on building an awesome experience!
 
 ---
 
@@ -90,7 +90,7 @@ No server headaches—just pure focus on building an awesome experience!
     <a href="https://t.me/n_a_t_n_a_e_l_g_i_r_m_a">Telegram</a> | 
     <a href="[linkdin](https://www.linkedin.com/in/natnael-girma-707a1a326?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)">LinkedIn</a>
   </p>
-  <p>Ping me—I’d love to chat about streaming, code, or collabs! 🚀</p>
+  <p>Ping me I’d love to chat about streaming, code, or collabs! 🚀</p>
 </div>
 
 <div align="center">
